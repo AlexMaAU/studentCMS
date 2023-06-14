@@ -1,4 +1,5 @@
 const Student = require('../models/Student')
+const Course = require('../models/Course')
 
 const getAllStudents = async (req, res)=>{
     //回调函数只负责查询数据，错误处理的职责可以提取到单独的错误处理中间件中
@@ -14,12 +15,12 @@ const getAllStudents = async (req, res)=>{
 
 const getStudentById = async (req,res)=>{
     try {
-        const {id} = req.params
-        if(!id) {
+        const {studentId} = req.params
+        if(!studentId) {
             res.status(400).json({error:'No ID provided'})
             process.exit(0)
         }
-        const student = await Student.findById(id).populate('courses').exec()
+        const student = await Student.findById(studentId).populate('courses').exec()
         res.status(201).json(student)
     } catch (error) {
         res.status(404).json({error:'No student ID found'})
@@ -37,10 +38,17 @@ const createNewStudent = async (req,res)=>{
     }
 }
 
+//这里的学生信息更新方式，是每次都要直接更新整个的学生信息内容
+//如果把给学生添加课程和移除课程的操作也放在这个endpoint进行，那么每次更新学生都需要把整个courses都重新覆盖一次，这样很不合理。
+//而且每个学生对应多个Course，一般遇到 1：N 的情况，都会再设置一层路径，把endpoint单独分开
+// 比如：/students/:studentId/courses/:courseId
+// /students/:studentId 确定是哪个学生
+// /courses/:courseId 确定这个学生下的哪个课程
 const updateStudentById = async (req,res)=>{
+    const {studentId} = req.params 
+    const {firstName,lastName,email} = req.body
     try {
-        const {id,firstName,lastName,email} = req.body
-        if(!id) {
+        if(!studentId) {
             res.status(400).json({error:'No ID provided'})
             process.exit(0)
         }
@@ -49,18 +57,19 @@ const updateStudentById = async (req,res)=>{
         //比如：
         // put /courses/:courseId/students/:studentId
         // put /courses/:courseId/teachers/:teacherId
-        const updatedStudent = await Student.findByIdAndUpdate(id,{firstName,lastName,email},{new:true}).populate('courses').exec()
+        const updatedStudent = await Student.findByIdAndUpdate(studentId,{firstName,lastName,email},{new:true}).populate('courses').exec()
         res.status(201).json(updatedStudent)
     } catch (error) {
         res.status(401).json({error:'No student id found'})
     }
 }
 
+//需要给学生每次增加一个Course或者移除一个Course的操作，可以使用下面的endpoint方式
 // put /students/:studentId/courses/:courseId
 // 把新的Course关联添加到Student的courses下
 const addCourseToStudent = async (req,res)=>{
+    const {studentId,courseId} = req.params
     try {
-        const {studentId,courseId} = req.params
         if(!studentId || !courseId) {
             res.status(404).json({error:'ID is empty'})
             process.exit(0)
@@ -69,33 +78,48 @@ const addCourseToStudent = async (req,res)=>{
         const student = await Student.findById(studentId).exec()
         student.courses.addToSet(courseId)
         await student.save()
-        res.json(student)
+        res.status(201).json(student)
 
         //但是 student 和 course 是双向绑定的，那么这个同时 course 下也应该新增加对应的 student 关联
-        // TO DO ...here
-        
-
-
-        
-        
-
-
+        const course = await Course.findById(courseId).exec()
+        course.students.addToSet(studentId)
+        await course.save()
     } catch (error) {
-        res.status(401).json({error:'No student id found'})
+        res.status(401).json({error:'Invalid ID'})
     }
 }
 
 //把Course从Student的courses下删除
-
+// delete /students/:studentId/courses/:courseId
+const removeCourseFromStudent = async(req,res)=>{
+    const {studentId, courseId} = req.params 
+    try {
+        if(!studentId || !courseId) {
+            res.status(404).json({error:'ID is empty'})
+            process.exit(0)
+        }
+        //在 student 下删除一条 course 关联
+        const student = await Student.findById(studentId).exec()
+        student.courses.pull(courseId)
+        await student.save()
+        res.status(201).json(student)
+        //但是 student 和 course 是双向绑定的，那么这个同时 course 下也应该删除对应的 student 关联
+        const course = await Course.findById(courseId).exec()
+        course.students.pull(studentId)
+        await course.save()
+    } catch (error) {
+        res.status(404).json({error:'Invalid ID'})
+    }
+}
 
 const deleteStudentById = async (req,res)=>{
     try {
-        const {id} = req.body
-        if(!id) {
+        const {studentId} = req.params
+        if(!studentId) {
             res.status(400).json({error:'No ID provided'})
             process.exit(0)
         }
-        const deletedStudent = await Student.findByIdAndRemove(id).populate('courses').exec()
+        const deletedStudent = await Student.findByIdAndRemove(studentId).populate('courses').exec()
         res.status(201).json(deletedStudent)
     } catch (error) {
         res.status(401).json({error:'No student id found'})
@@ -106,4 +130,12 @@ const deleteStudentById = async (req,res)=>{
  * export.function和export default是ES6模块系统的导出语法，适用于现代浏览器和支持ES6模块的环境。
  * export.function用于具名导出，而export default用于默认导出。
  */
-module.exports = {getAllStudents,getStudentById,createNewStudent,updateStudentById,addCourseToStudent,deleteStudentById}
+module.exports = {
+    getAllStudents,
+    getStudentById,
+    createNewStudent,
+    updateStudentById,
+    addCourseToStudent,
+    removeCourseFromStudent,
+    deleteStudentById
+}
