@@ -27,10 +27,12 @@ const getCourseById = async (req,res)=>{
     }
 }
 
+// 创建新的学生数据时，courses字段的类型被定义为Schema.Types.ObjectId，它期望传入的值是一个有效的ObjectId（对象ID）。如果未提供有效的ObjectId或者为空，Mongoose将无法正确处理这个字段，并且在尝试保存新的teacher数据时可能会抛出错误。
+// 如果想在创建数据时不传递courses值，你可以在模式中将courses字段设置为可选的，可以通过在其定义中添加required: false来实现
 const createNewCourse = async (req,res)=>{
-    const {name,description,students,teachers} = req.body
+    const {name,description} = req.body
     try {
-        const newCourse = await new Course({name,description,students,teachers}).save()
+        const newCourse = await new Course({name,description}).save()
         res.json(newCourse)
     } catch (error) {
         res.status(400).json({error:'fail to create data'})

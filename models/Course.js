@@ -10,12 +10,17 @@ const courseSchema = Schema({
     students: [
         {
             type:Schema.Types.ObjectId,
-            ref:'Student'
+            ref:'Student',
+            required:false
         }
     ],
-    teachers: {
-        
-    }
+    teachers: [
+        {
+            type:Schema.Types.ObjectId,
+            ref:'Teacher',
+            required:false
+        }
+    ]
 })
 
 const Course = model('Course', courseSchema)

@@ -29,9 +29,9 @@ const getStudentById = async (req,res)=>{
 
 const createNewStudent = async (req,res)=>{
     try {
-        const {firstName,lastName,email,courses} = req.body
+        const {firstName,lastName,email} = req.body
         //Student model中绑定了Course model，所以还需要建立Course model
-        const newStudent = await new Student({firstName,lastName,email,courses}).populate('courses').save()
+        const newStudent = await new Student({firstName,lastName,email}).save()
         res.status(201).json(newStudent)
     } catch (error) {
         res.status(400).json({error:'Failed to create a new student'})
@@ -60,7 +60,7 @@ const updateStudentById = async (req,res)=>{
         const updatedStudent = await Student.findByIdAndUpdate(studentId,{firstName,lastName,email},{new:true}).populate('courses').exec()
         res.status(201).json(updatedStudent)
     } catch (error) {
-        res.status(401).json({error:'No student id found'})
+        res.status(404).json({error:'No student id found'})
     }
 }
 
@@ -85,7 +85,7 @@ const addCourseToStudent = async (req,res)=>{
         course.students.addToSet(studentId)
         await course.save()
     } catch (error) {
-        res.status(401).json({error:'Invalid ID'})
+        res.status(404).json({error:'Invalid ID'})
     }
 }
 
@@ -119,10 +119,10 @@ const deleteStudentById = async (req,res)=>{
             res.status(400).json({error:'No ID provided'})
             process.exit(0)
         }
-        const deletedStudent = await Student.findByIdAndRemove(studentId).populate('courses').exec()
+        const deletedStudent = await Student.findByIdAndRemove(studentId).exec()
         res.status(201).json(deletedStudent)
     } catch (error) {
-        res.status(401).json({error:'No student id found'})
+        res.status(404).json({error:'No student id found'})
     }
 }
 

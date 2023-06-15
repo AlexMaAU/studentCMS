@@ -5,6 +5,7 @@ dotenv.config()
 const connectDB = require('./utils/db')
 const studentRouter = require('./routes/students')
 const courseRouter = require('./routes/courses')
+const teacherRouter = require('./routes/teachers')
 
 const PORT = process.env.PORT || 3000
 
@@ -12,6 +13,7 @@ app.use(express.json())
 //use()函数的职责是使用路由中间件，中间件的具体代码可以分拆到 routes-students.js 中
 app.use(studentRouter)
 app.use(courseRouter)
+app.use(teacherRouter)
 
 //app.js的职责是调用中间件，那么启动服务器的功能其实也需要拆出来到express.js中
 //这样的话express.js的职责是建立express服务器，db.js的职责是连接数据库

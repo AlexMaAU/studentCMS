@@ -15,7 +15,8 @@ const studentSchema = new Schema({
         {
             //关联的field，type应该是使用Schema.Types.ObjectId
             type:Schema.Types.ObjectId,
-            ref:'Course'
+            ref:'Course',
+            required:false
         }
     ]
 })
