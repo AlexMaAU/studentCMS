@@ -14,12 +14,12 @@ const getAllStudents = async (req, res)=>{
 }
 
 const getStudentById = async (req,res)=>{
+    const {studentId} = req.params
+    if(!studentId) {
+        res.status(400).json({error:'No students ID provided'})
+        process.exit(0)
+    }
     try {
-        const {studentId} = req.params
-        if(!studentId) {
-            res.status(400).json({error:'No ID provided'})
-            process.exit(0)
-        }
         const student = await Student.findById(studentId).populate('courses').exec()
         res.status(201).json(student)
     } catch (error) {
@@ -28,8 +28,20 @@ const getStudentById = async (req,res)=>{
 }
 
 const createNewStudent = async (req,res)=>{
+    const {firstName,lastName,email} = req.body
+    if(!firstName) {
+        res.status(400).json({error:'No first name provided'})
+        process.exit(0)
+    }
+    if(!lastName) {
+        res.status(400).json({error:'No last name provided'})
+        process.exit(0)
+    }
+    if(!email) {
+        res.status(400).json({error:'No email provided'})
+        process.exit(0)
+    }
     try {
-        const {firstName,lastName,email} = req.body
         //Student model中绑定了Course model，所以还需要建立Course model
         const newStudent = await new Student({firstName,lastName,email}).save()
         res.status(201).json(newStudent)
@@ -47,11 +59,23 @@ const createNewStudent = async (req,res)=>{
 const updateStudentById = async (req,res)=>{
     const {studentId} = req.params 
     const {firstName,lastName,email} = req.body
+    if(!studentId) {
+        res.status(400).json({error:'No ID provided'})
+        process.exit(0)
+    }
+    if(!firstName) {
+        res.status(400).json({error:'No first name provided'})
+        process.exit(0)
+    }
+    if(!lastName) {
+        res.status(400).json({error:'No last name provided'})
+        process.exit(0)
+    }
+    if(!email) {
+        res.status(400).json({error:'No email provided'})
+        process.exit(0)
+    }
     try {
-        if(!studentId) {
-            res.status(400).json({error:'No ID provided'})
-            process.exit(0)
-        }
         //一般开发中，对关联数据的操作，特别是关联数据可以是多个的时候(数组形式)，会设置为二级、三级路径，然后对该路径进行单独的处理
         //这里Student Model里关联的courses是数组，一个学生可以关联多个course
         //比如：
@@ -69,11 +93,20 @@ const updateStudentById = async (req,res)=>{
 // 把新的Course关联添加到Student的courses下
 const addCourseToStudent = async (req,res)=>{
     const {studentId,courseId} = req.params
+    // 重点：后端需要考虑的事情
+    // 1. 数据检查 - 要确保防止各种可能存在的问题，比如前端传来的是空数据、假数据等
+    // 2. 流程控制 - 要确保那些函数优先执行，把会报错的先做错误处理
+    // 3. 精确反馈 - 通过status code、根据不同情况设置不同的response等方法，尽可能的精准向前端反馈执行结果和错误信息
+    if(!studentId) {
+        res.status(404).json({error:'student ID is empty'})
+        process.exit(0)
+    }
+    if(!courseId) {
+        res.status(404).json({error:'course ID is empty'})
+        process.exit(0)
+    }
+
     try {
-        if(!studentId || !courseId) {
-            res.status(404).json({error:'ID is empty'})
-            process.exit(0)
-        }
         //在 student 下添加新的 course 关联
         const student = await Student.findById(studentId).exec()
         student.courses.addToSet(courseId)
@@ -85,7 +118,7 @@ const addCourseToStudent = async (req,res)=>{
         course.students.addToSet(studentId)
         await course.save()
     } catch (error) {
-        res.status(404).json({error:'Invalid ID'})
+        res.status(404).json({error})
     }
 }
 
@@ -93,11 +126,15 @@ const addCourseToStudent = async (req,res)=>{
 // delete /students/:studentId/courses/:courseId
 const removeCourseFromStudent = async(req,res)=>{
     const {studentId, courseId} = req.params 
+    if(!studentId) {
+        res.status(404).json({error:'student ID is empty'})
+        process.exit(0)
+    }
+    if(!courseId) {
+        res.status(404).json({error:'course ID is empty'})
+        process.exit(0)
+    }
     try {
-        if(!studentId || !courseId) {
-            res.status(404).json({error:'ID is empty'})
-            process.exit(0)
-        }
         //在 student 下删除一条 course 关联
         const student = await Student.findById(studentId).exec()
         student.courses.pull(courseId)
@@ -113,12 +150,12 @@ const removeCourseFromStudent = async(req,res)=>{
 }
 
 const deleteStudentById = async (req,res)=>{
+    const {studentId} = req.params
+    if(!studentId) {
+        res.status(400).json({error:'No ID provided'})
+        process.exit(0)
+    }
     try {
-        const {studentId} = req.params
-        if(!studentId) {
-            res.status(400).json({error:'No ID provided'})
-            process.exit(0)
-        }
         const deletedStudent = await Student.findByIdAndRemove(studentId).exec()
         res.status(201).json(deletedStudent)
     } catch (error) {

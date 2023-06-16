@@ -1,12 +1,13 @@
 const Course = require('../models/Course')
 const Student = require('../models/Student')
+const Teacher = require('../models/Teacher')
 
 const getAllCourses = async (req,res)=>{
     //后端的两个原则：
     //但凡有可能出错的地方都要考虑容错机制
     //永远不要相信前端传来的数据，一定要再次验证
     try {
-        const courses = await Course.find().populate('students').exec()
+        const courses = await Course.find().populate(['students','teachers']).exec()
         res.status(201).json(courses)
     } catch (error) {
         res.status(404).json({error:'No data found'})
@@ -18,8 +19,12 @@ const getCourseById = async (req,res)=>{
     //后端的两个原则：
     //但凡有可能出错的地方都要考虑容错机制
     //永远不要相信前端传来的数据，一定要再次验证
+    if(!courseId) {
+        res.status(400).json({error:'No course ID provided'})
+        process.exit(0)
+    }
     try {
-        const course = await Course.findById(courseId).populate('students').exec()
+        const course = await Course.findById(courseId).populate(['students','teachers']).exec()
         //养成良好的代码习惯，每个response都应该加上网络状态码
         res.status(201).json(course)
     } catch (error) {
@@ -31,6 +36,14 @@ const getCourseById = async (req,res)=>{
 // 如果想在创建数据时不传递courses值，你可以在模式中将courses字段设置为可选的，可以通过在其定义中添加required: false来实现
 const createNewCourse = async (req,res)=>{
     const {name,description} = req.body
+    if(!name) {
+        res.status(400).json({error:'No name provided'})
+        process.exit(0)
+    }
+    if(!description) {
+        res.status(400).json({error:'No description provided'})
+        process.exit(0)
+    }
     try {
         const newCourse = await new Course({name,description}).save()
         res.json(newCourse)
@@ -42,6 +55,18 @@ const createNewCourse = async (req,res)=>{
 const updateCourseById = async (req,res)=>{
     const {courseId} = req.params
     const {name,description} = req.body
+    if(!courseId) {
+        res.status(400).json({error:'No course ID provided'})
+        process.exit(0)
+    }
+    if(!name) {
+        res.status(400).json({error:'No name provided'})
+        process.exit(0)
+    }
+    if(!description) {
+        res.status(400).json({error:'No description provided'})
+        process.exit(0)
+    }
     try {
         //下面注释掉的这个方法有什么问题？更改name和description是修改Course的数据值，属于相同的功能，可以放在body里一起传入
         //但是把Course中关联的Student和Teacher进行添加删除操作，是额外的职责，应该单独划分出去
@@ -67,6 +92,10 @@ const updateCourseById = async (req,res)=>{
 
 const deleteCourseById = async (req,res)=>{
     const {courseId} = req.params
+    if(!courseId) {
+        res.status(404).json({error:'course ID is empty'})
+        process.exit(0)
+    }
     try {
         const deleted = await Course.findByIdAndDelete(courseId).exec()
         res.status(201).json(deleted)
@@ -80,6 +109,14 @@ const deleteCourseById = async (req,res)=>{
 //put /courses/:courseId/students/:studentId
 const addStudentToCourse = async (req,res)=>{
     const {courseId, studentId} = req.params
+    if(!studentId) {
+        res.status(404).json({error:'student ID is empty'})
+        process.exit(0)
+    }
+    if(!courseId) {
+        res.status(404).json({error:'course ID is empty'})
+        process.exit(0)
+    }
     try {
         if(!courseId || !studentId) {
             res.status(404).json({error:'ID is empty'})
@@ -105,6 +142,14 @@ const addStudentToCourse = async (req,res)=>{
 //delete /courses/:courseId/students/:studentId
 const removeStudentFromCourse = async (req,res)=>{
     const {courseId, studentId} = req.params
+    if(!studentId) {
+        res.status(404).json({error:'student ID is empty'})
+        process.exit(0)
+    }
+    if(!courseId) {
+        res.status(404).json({error:'course ID is empty'})
+        process.exit(0)
+    }
     try {
         const course = await Course.findById(courseId).exec()
         course.students.pull(studentId)
@@ -121,12 +166,58 @@ const removeStudentFromCourse = async (req,res)=>{
 //给Course下增加一个老师的关联记录
 //add Teacher to Course.teachers
 //put /courses/:courseId/teachers/:teacherId
-
+const addTeacherToCourse = async (req,res)=>{
+    const {courseId, teacherId} = req.params
+    if(!studentId) {
+        res.status(404).json({error:'student ID is empty'})
+        process.exit(0)
+    }
+    if(!courseId) {
+        res.status(404).json({error:'course ID is empty'})
+        process.exit(0)
+    }
+    try {
+        //add teacher to course.teachers
+        const course = await Course.findById(courseId).exec()
+        course.teachers.addToSet(teacherId)
+        course.save()
+        //add course to teacher.courses
+        const teacher = await Teacher.findById(teacherId).exec()
+        teacher.courses.addToSet(courseId)
+        teacher.save()
+        res.status(201).json(teacher)
+    } catch (error) {
+        res.status(404).json({error:'Failed to add teacher to course'})
+    }
+}
 
 //给Course下删除一个老师的关联记录
 //remove Teacher from Course.teachers
 //delete /courses/:courseId/teachers/:teacherId
-
+const removeTeacherFromCourse = async (req,res)=>{
+    const {courseId, teacherId} = req.params
+    if(!studentId) {
+        res.status(404).json({error:'student ID is empty'})
+        process.exit(0)
+    }
+    if(!courseId) {
+        res.status(404).json({error:'course ID is empty'})
+        process.exit(0)
+    }
+    try {
+        //add teacher to course.teachers
+        const course = await Course.findById(courseId).exec()
+        course.teachers.pull(teacherId)
+        course.save()
+        //add course to teacher.courses
+        const teacher = await Teacher.findById(teacherId).exec()
+        teacher.courses.pull(courseId)
+        teacher.save()
+        res.status(201).json(teacher)
+    } catch (error) {
+        res.status(404).json({error:'Failed to add teacher to course'})
+    }
+}
 
 module.exports = {
     getAllCourses,
@@ -135,5 +226,7 @@ module.exports = {
     updateCourseById,
     deleteCourseById,
     addStudentToCourse,
-    removeStudentFromCourse
+    removeStudentFromCourse,
+    addTeacherToCourse,
+    removeTeacherFromCourse
 }
