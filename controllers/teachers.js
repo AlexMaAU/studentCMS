@@ -15,7 +15,7 @@ const getAllTeachers = async (req,res)=>{
 const getTeacherById = async (req,res)=>{
     const {teacherId} = req.params
     if(!teacherId) {
-        res.status(404).json({error:'Teacher Id is empty'})
+        res.status(404).json({code:0, error:'Teacher Id is empty'})
         process.exit(0)
     }
     try {
@@ -29,15 +29,15 @@ const getTeacherById = async (req,res)=>{
 const createNewTeacher = async (req,res)=>{
     const {firstName,lastName,email} = req.body
     if(!firstName) {
-        res.status(400).json({error:'No first name provided'})
+        res.status(400).json({code:0, error:'No first name provided'})
         process.exit(0)
     }
     if(!lastName) {
-        res.status(400).json({error:'No last name provided'})
+        res.status(400).json({code:1, error:'No last name provided'})
         process.exit(0)
     }
     if(!email) {
-        res.status(400).json({error:'No email provided'})
+        res.status(400).json({code:2, error:'No email provided'})
         process.exit(0)
     }
     try {
@@ -53,19 +53,19 @@ const updateTeacherById = async (req,res)=>{
     const {teacherId} = req.params
     const {firstName,lastName,email} = req.body
     if(!teacherId) {
-        res.status(400).json({error:'No teacher ID provided'})
+        res.status(400).json({code:0, error:'No teacher ID provided'})
         process.exit(0)
     }
     if(!firstName) {
-        res.status(400).json({error:'No first name provided'})
+        res.status(400).json({code:1, error:'No first name provided'})
         process.exit(0)
     }
     if(!lastName) {
-        res.status(400).json({error:'No last name provided'})
+        res.status(400).json({code:2, error:'No last name provided'})
         process.exit(0)
     }
     if(!email) {
-        res.status(400).json({error:'No email provided'})
+        res.status(400).json({code:3, error:'No email provided'})
         process.exit(0)
     }
     try {
@@ -79,7 +79,7 @@ const updateTeacherById = async (req,res)=>{
 const deleteTeacherById = async (req,res)=>{
     const {teacherId} = req.params
     if(!teacherId) {
-        res.status(400).json({error:'No teacher ID provided'})
+        res.status(400).json({code:0, error:'No teacher ID provided'})
         process.exit(0)
     }
     try {
@@ -99,11 +99,11 @@ const deleteTeacherById = async (req,res)=>{
 const addCourseToTeacher = async (req,res)=>{
     const {teacherId, courseId} = req.params
     if(!teacherId) {
-        res.status(404).json({error:'Teacher ID is empty'})
+        res.status(404).json({code:0, error:'Teacher ID is empty'})
         process.exit(0)
     }
     if(!courseId) {
-        res.status(404).json({error:'course ID is empty'})
+        res.status(404).json({code:1, error:'course ID is empty'})
         process.exit(0)
     }
     try {
@@ -127,11 +127,11 @@ const addCourseToTeacher = async (req,res)=>{
 const removeCourseFromTeacher = async (req,res)=>{
     const {teacherId, courseId} = req.params
     if(!teacherId) {
-        res.status(404).json({error:'Teacher ID is empty'})
+        res.status(404).json({code:0, error:'Teacher ID is empty'})
         process.exit(0)
     }
     if(!courseId) {
-        res.status(404).json({error:'course ID is empty'})
+        res.status(404).json({code:1, error:'course ID is empty'})
         process.exit(0)
     }
     try {

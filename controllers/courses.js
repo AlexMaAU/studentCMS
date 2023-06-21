@@ -20,7 +20,7 @@ const getCourseById = async (req,res)=>{
     //但凡有可能出错的地方都要考虑容错机制
     //永远不要相信前端传来的数据，一定要再次验证
     if(!courseId) {
-        res.status(400).json({error:'No course ID provided'})
+        res.status(400).json({code:0, error:'No course ID provided'})
         process.exit(0)
     }
     try {
@@ -37,11 +37,13 @@ const getCourseById = async (req,res)=>{
 const createNewCourse = async (req,res)=>{
     const {name,description} = req.body
     if(!name) {
-        res.status(400).json({error:'No name provided'})
+        // 有多个并列检查的时候，给每个检查加上一个code，这样前端可以快速锁定哪里出了问题
+        res.status(400).json({code:0, error:'No name provided'})
         process.exit(0)
     }
     if(!description) {
-        res.status(400).json({error:'No description provided'})
+        // 后端可以在提供接口给前端的时候，直接注明不同函数的code所对应的含义
+        res.status(400).json({code:1, error:'No description provided'})
         process.exit(0)
     }
     try {
@@ -56,15 +58,15 @@ const updateCourseById = async (req,res)=>{
     const {courseId} = req.params
     const {name,description} = req.body
     if(!courseId) {
-        res.status(400).json({error:'No course ID provided'})
+        res.status(400).json({code:0, error:'No course ID provided'})
         process.exit(0)
     }
     if(!name) {
-        res.status(400).json({error:'No name provided'})
+        res.status(400).json({code:1, error:'No name provided'})
         process.exit(0)
     }
     if(!description) {
-        res.status(400).json({error:'No description provided'})
+        res.status(400).json({code:2, error:'No description provided'})
         process.exit(0)
     }
     try {
@@ -93,7 +95,7 @@ const updateCourseById = async (req,res)=>{
 const deleteCourseById = async (req,res)=>{
     const {courseId} = req.params
     if(!courseId) {
-        res.status(404).json({error:'course ID is empty'})
+        res.status(404).json({code:0, rror:'course ID is empty'})
         process.exit(0)
     }
     try {
@@ -110,11 +112,11 @@ const deleteCourseById = async (req,res)=>{
 const addStudentToCourse = async (req,res)=>{
     const {courseId, studentId} = req.params
     if(!studentId) {
-        res.status(404).json({error:'student ID is empty'})
+        res.status(404).json({code:0, error:'student ID is empty'})
         process.exit(0)
     }
     if(!courseId) {
-        res.status(404).json({error:'course ID is empty'})
+        res.status(404).json({code:1, error:'course ID is empty'})
         process.exit(0)
     }
     try {
@@ -143,11 +145,11 @@ const addStudentToCourse = async (req,res)=>{
 const removeStudentFromCourse = async (req,res)=>{
     const {courseId, studentId} = req.params
     if(!studentId) {
-        res.status(404).json({error:'student ID is empty'})
+        res.status(404).json({code:0, error:'student ID is empty'})
         process.exit(0)
     }
     if(!courseId) {
-        res.status(404).json({error:'course ID is empty'})
+        res.status(404).json({code:1, error:'course ID is empty'})
         process.exit(0)
     }
     try {
@@ -169,11 +171,11 @@ const removeStudentFromCourse = async (req,res)=>{
 const addTeacherToCourse = async (req,res)=>{
     const {courseId, teacherId} = req.params
     if(!studentId) {
-        res.status(404).json({error:'student ID is empty'})
+        res.status(404).json({code:0, error:'student ID is empty'})
         process.exit(0)
     }
     if(!courseId) {
-        res.status(404).json({error:'course ID is empty'})
+        res.status(404).json({code:1, error:'course ID is empty'})
         process.exit(0)
     }
     try {
@@ -196,12 +198,12 @@ const addTeacherToCourse = async (req,res)=>{
 //delete /courses/:courseId/teachers/:teacherId
 const removeTeacherFromCourse = async (req,res)=>{
     const {courseId, teacherId} = req.params
-    if(!studentId) {
-        res.status(404).json({error:'student ID is empty'})
+    if(!teacherId) {
+        res.status(404).json({code:0, error:'student ID is empty'})
         process.exit(0)
     }
     if(!courseId) {
-        res.status(404).json({error:'course ID is empty'})
+        res.status(404).json({code:1, error:'course ID is empty'})
         process.exit(0)
     }
     try {

@@ -16,7 +16,7 @@ const getAllStudents = async (req, res)=>{
 const getStudentById = async (req,res)=>{
     const {studentId} = req.params
     if(!studentId) {
-        res.status(400).json({error:'No students ID provided'})
+        res.status(400).json({code:0, error:'No students ID provided'})
         process.exit(0)
     }
     try {
@@ -30,15 +30,15 @@ const getStudentById = async (req,res)=>{
 const createNewStudent = async (req,res)=>{
     const {firstName,lastName,email} = req.body
     if(!firstName) {
-        res.status(400).json({error:'No first name provided'})
+        res.status(400).json({code:0, error:'No first name provided'})
         process.exit(0)
     }
     if(!lastName) {
-        res.status(400).json({error:'No last name provided'})
+        res.status(400).json({code:1, error:'No last name provided'})
         process.exit(0)
     }
     if(!email) {
-        res.status(400).json({error:'No email provided'})
+        res.status(400).json({code:2, error:'No email provided'})
         process.exit(0)
     }
     try {
@@ -60,19 +60,19 @@ const updateStudentById = async (req,res)=>{
     const {studentId} = req.params 
     const {firstName,lastName,email} = req.body
     if(!studentId) {
-        res.status(400).json({error:'No ID provided'})
+        res.status(400).json({code:0, error:'No ID provided'})
         process.exit(0)
     }
     if(!firstName) {
-        res.status(400).json({error:'No first name provided'})
+        res.status(400).json({code:1, error:'No first name provided'})
         process.exit(0)
     }
     if(!lastName) {
-        res.status(400).json({error:'No last name provided'})
+        res.status(400).json({code:2, error:'No last name provided'})
         process.exit(0)
     }
     if(!email) {
-        res.status(400).json({error:'No email provided'})
+        res.status(400).json({code:3, error:'No email provided'})
         process.exit(0)
     }
     try {
@@ -98,11 +98,11 @@ const addCourseToStudent = async (req,res)=>{
     // 2. 流程控制 - 要确保那些函数优先执行，把会报错的先做错误处理
     // 3. 精确反馈 - 通过status code、根据不同情况设置不同的response等方法，尽可能的精准向前端反馈执行结果和错误信息
     if(!studentId) {
-        res.status(404).json({error:'student ID is empty'})
+        res.status(404).json({code:0, error:'student ID is empty'})
         process.exit(0)
     }
     if(!courseId) {
-        res.status(404).json({error:'course ID is empty'})
+        res.status(404).json({code:1, error:'course ID is empty'})
         process.exit(0)
     }
 
@@ -127,11 +127,11 @@ const addCourseToStudent = async (req,res)=>{
 const removeCourseFromStudent = async(req,res)=>{
     const {studentId, courseId} = req.params 
     if(!studentId) {
-        res.status(404).json({error:'student ID is empty'})
+        res.status(404).json({code:0, error:'student ID is empty'})
         process.exit(0)
     }
     if(!courseId) {
-        res.status(404).json({error:'course ID is empty'})
+        res.status(404).json({code:1, error:'course ID is empty'})
         process.exit(0)
     }
     try {
@@ -152,7 +152,7 @@ const removeCourseFromStudent = async(req,res)=>{
 const deleteStudentById = async (req,res)=>{
     const {studentId} = req.params
     if(!studentId) {
-        res.status(400).json({error:'No ID provided'})
+        res.status(400).json({code:0, error:'No ID provided'})
         process.exit(0)
     }
     try {
